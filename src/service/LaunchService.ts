@@ -50,15 +50,7 @@ async function launchServiceUpdateLaunch(id: number, launchDto: IUpdateLaunchDto
 		throw new Error(`Não foi possível encontrar rocket com o id ${launchDto.rocketId} para ser attribuído ao launch ${launchDto.launchCode}`)
 	}
 
-	oldLaunch.rocket = new Rocket(rocket.id ?? 0, rocket.name)
-	oldLaunch.launchCode = launchDto.launchCode;
-	oldLaunch.date = launchDto.date;
-	oldLaunch.success = launchDto.success;
-
-	if (crew === undefined) oldLaunch.crew = undefined;
-	else oldLaunch.crew = new Crew(crew?.id ?? 0, crew?.name ?? '', []);
-
-	const launch = await launchRepository.update(id, oldLaunch);
+	const launch = await launchRepository.update(id, update(oldLaunch, launchDto, rocket, crew));
 	const updatedLaunch = await launchServiceGetLaunch(launch.id);
 
 	if (updatedLaunch === undefined) {
@@ -88,6 +80,23 @@ function buildNewLaunch(
 	);
 }
 
+function update(
+	oldLaunch: Launch,
+	launchDto: IUpdateLaunchDto,
+	rocket: IRocketDto,
+	crew: ICrewDto | undefined
+): Launch {
+
+	oldLaunch.rocket = new Rocket(rocket.id ?? 0, rocket.name)
+	oldLaunch.launchCode = launchDto.launchCode;
+	oldLaunch.date = launchDto.date;
+	oldLaunch.success = launchDto.success;
+
+	if (crew === undefined) oldLaunch.crew = undefined;
+	else oldLaunch.crew = new Crew(crew?.id ?? 0, crew?.name ?? '', []);
+
+	return oldLaunch;
+}
 export {
 	launchServiceGetLaunchs,
 	launchServiceGetLaunch,
