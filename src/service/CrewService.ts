@@ -1,5 +1,4 @@
 import { ICreateCrewDto, ICrewDto, IUpdateCrewDto } from "../dto/CrewDto";
-import { ICrewmanDto } from "../dto/CrewmanDto";
 import { Crew } from "../model/Crew";
 import { Crewman } from "../model/Crewman";
 import { CrewRepository } from "../repository/CrewRepository";
@@ -46,11 +45,7 @@ async function crewServiceUpdateCrew(id: number, crewDto: IUpdateCrewDto): Promi
 		throw new Error('404 Not Found: Não foi possível encontrar o recurso para ser atualizado');
 	}
 
-	const crewmansDtos = await crewmanServiceGetCrewmans();
-	const crewmans = crewmansDtos.filter(crewman => crewDto.crewmans
-		?.some(crewmanId => crewmanId === crewman.id)
-		?? false
-	).map(crewman => new Crewman(crewman.id ?? 0, crewman.name, crewman.patent));
+	const crewmans = await getCrewCrewmans(crewDto);
 
 	crew.name = crewDto.name;
 	crew.crewmans = crewmans;
@@ -60,6 +55,17 @@ async function crewServiceUpdateCrew(id: number, crewDto: IUpdateCrewDto): Promi
 
 async function crewServiceDeleteCrew(id: number): Promise<void> {
 	await crewRepository.delete(id);
+}
+
+async function getCrewCrewmans(crew: ICreateCrewDto): Promise<Crewman[]> {
+
+	const crewmans = await crewmanServiceGetCrewmans();
+
+	return crewmans.filter(crewman => crew.crewmans
+		?.some(crewmanId => crewmanId === crewman.id)
+		?? false
+	)
+	.map(crewman => new Crewman(crewman.id ?? 0, crewman.name, crewman.patent));
 }
 
 export {
