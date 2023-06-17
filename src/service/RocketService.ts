@@ -1,40 +1,50 @@
 import { ICreateRocketDto, IRocketDto, IUpdateRocketDto } from "../dto/RocketDto";
 import { Rocket } from "../model/Rocket";
 import { IRepository } from "../repository/Repository";
-import { RocketRepository } from "../repository/RocketRepository";
 
-	
-const rocketRepository: IRepository<Rocket> = new RocketRepository();
-
-async function rocketServiceGetRockets(): Promise<IRocketDto[]> {
-	return await rocketRepository.findAll();
+interface IRocketService {
+	getRockets(): Promise<IRocketDto[]>;
+	getRocket(rocketId: number): Promise<IRocketDto | undefined>;
+	createRocket(rocket: ICreateRocketDto): Promise<IRocketDto>;
+	updateRocket(id: number, rocket: IUpdateRocketDto): Promise<IRocketDto>;
+	deleteRocket(id: number): Promise<void>;
 }
 
-async function rocketServiceGetRocket(rocketId?: number): Promise<IRocketDto | undefined> {
-	if(rocketId === undefined) return undefined
-	return await rocketRepository.findById(rocketId);
-}
+class RocketService implements IRocketService {
 
-async function rocketServiceCreateRocket(rocket: ICreateRocketDto): Promise<IRocketDto> {
-	return await rocketRepository.create(new Rocket(0, rocket.name));
-}
+	private rocketRepository: IRepository<Rocket>;
 
-async function rocketServiceUpdateRocket(id: number, rocket: IUpdateRocketDto): Promise<IRocketDto> {
-	
-	const updatedRocket = await rocketRepository.findById(id);	
-	updatedRocket.name = rocket.name;
+	constructor(repository: IRepository<Rocket>) {
+		this.rocketRepository = repository;
+	}
 
-	return await rocketRepository.update(id, updatedRocket);
-}
+	async getRockets(): Promise<IRocketDto[]> {
+		return await this.rocketRepository.findAll();
+	}
 
-async function rocketServiceDeleteRocket(id: number): Promise<void> {
-	await rocketRepository.delete(id);
+	async getRocket(rocketId?: number): Promise<IRocketDto | undefined> {
+		if (rocketId === undefined) return undefined
+		return await this.rocketRepository.findById(rocketId);
+	}
+
+	async createRocket(rocket: ICreateRocketDto): Promise<IRocketDto> {
+		return await this.rocketRepository.create(new Rocket(0, rocket.name));
+	}
+
+	async updateRocket(id: number, rocket: IUpdateRocketDto): Promise<IRocketDto> {
+
+		const updatedRocket = await this.rocketRepository.findById(id);
+		updatedRocket.name = rocket.name;
+
+		return await this.rocketRepository.update(id, updatedRocket);
+	}
+
+	async deleteRocket(id: number): Promise<void> {
+		await this.rocketRepository.delete(id);
+	}
 }
 
 export {
-	rocketServiceGetRockets,
-	rocketServiceGetRocket,
-	rocketServiceCreateRocket,
-	rocketServiceUpdateRocket,
-	rocketServiceDeleteRocket
+	IRocketService,
+	RocketService
 };

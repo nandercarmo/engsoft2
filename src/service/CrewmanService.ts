@@ -1,38 +1,49 @@
 import { ICreateCrewmanDto, ICrewmanDto, IUpdateCrewmanDto } from "../dto/CrewmanDto";
-import { CrewmanRepository } from "../repository/CrewmanRepository";
 import { IRepository } from "../repository/Repository";
 
-const crewmanRepository: IRepository<ICrewmanDto> = new CrewmanRepository();
-
-async function crewmanServiceGetCrewmans(): Promise<ICrewmanDto[]> {
-	return await crewmanRepository.findAll();
+interface ICrewmanService {
+	getCrewmans(): Promise<ICrewmanDto[]>;
+	getCrewman(id: number): Promise<ICrewmanDto>;
+	createCrewman(crewman: ICreateCrewmanDto): Promise<ICrewmanDto>;
+	updateCrewman(id: number, crewman: IUpdateCrewmanDto): Promise<ICrewmanDto>;
+	deleteCrewman(id: number): Promise<void>;
 }
 
-async function crewmanServiceGetCrewman(id: number): Promise<ICrewmanDto> {
-	return await crewmanRepository.findById(id);
-}
+class CrewmanService implements ICrewmanService {
 
-async function crewmanServiceCreateCrewman(crewman: ICreateCrewmanDto): Promise<ICrewmanDto> {
-	return await crewmanRepository.create(crewman);
-}
+	private crewmanRepository: IRepository<ICrewmanDto>;
 
-async function crewmanServiceUpdateCrewman(id: number, crewman: IUpdateCrewmanDto): Promise<ICrewmanDto> {
+	constructor(repository: IRepository<ICrewmanDto>) {
+		this.crewmanRepository = repository;
+	}
 
-	const updatedCrewman = await crewmanRepository.findById(id);
-	updatedCrewman.name = crewman.name;
-	updatedCrewman.patent = crewman.patent;
+	async getCrewmans(): Promise<ICrewmanDto[]> {
+		return await this.crewmanRepository.findAll();
+	}
 
-	return await crewmanRepository.update(id, updatedCrewman);
-}
+	async getCrewman(id: number): Promise<ICrewmanDto> {
+		return await this.crewmanRepository.findById(id);
+	}
 
-async function crewmanServiceDeleteCrewman(id: number): Promise<void> {
-	await crewmanRepository.delete(id);
+	async createCrewman(crewman: ICreateCrewmanDto): Promise<ICrewmanDto> {
+		return await this.crewmanRepository.create(crewman);
+	}
+
+	async updateCrewman(id: number, crewman: IUpdateCrewmanDto): Promise<ICrewmanDto> {
+
+		const updatedCrewman = await this.crewmanRepository.findById(id);
+		updatedCrewman.name = crewman.name;
+		updatedCrewman.patent = crewman.patent;
+
+		return await this.crewmanRepository.update(id, updatedCrewman);
+	}
+
+	async deleteCrewman(id: number): Promise<void> {
+		await this.crewmanRepository.delete(id);
+	}
 }
 
 export {
-	crewmanServiceGetCrewmans,
-	crewmanServiceGetCrewman,
-	crewmanServiceCreateCrewman,
-	crewmanServiceUpdateCrewman,
-	crewmanServiceDeleteCrewman
+	ICrewmanService,
+	CrewmanService
 };

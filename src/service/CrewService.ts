@@ -1,77 +1,87 @@
 import { ICreateCrewDto, ICrewDto, IUpdateCrewDto } from "../dto/CrewDto";
+import { ICrewmanDto } from "../dto/CrewmanDto";
 import { Crew } from "../model/Crew";
 import { Crewman } from "../model/Crewman";
-import { CrewRepository } from "../repository/CrewRepository";
 import { IRepository } from "../repository/Repository";
-import { crewmanServiceGetCrewmans } from "./CrewmanService";
+import { CrewmanService } from "./CrewmanService";
 
-const crewRepository: IRepository<Crew> = new CrewRepository();
-
-async function crewServiceGetCrews(): Promise<ICrewDto[]> {
-	const crews = await crewRepository.findAll();
-	return crews;
+interface ICrewService {
+	getCrews(): Promise<ICrewDto[]>;
+	getCrew(crewId?: number): Promise<ICrewDto | undefined>;
+	createCrew(crew: ICreateCrewDto): Promise<ICrewDto>;
+	updateCrew(id: number, crew: IUpdateCrewDto): Promise<ICrewDto>;
+	deleteCrew(id: number): Promise<void>;
 }
 
-async function crewServiceGetCrew(crewId?: number): Promise<ICrewDto | undefined> {
+class CrewService implements ICrewService {
 
-	if (crewId === undefined) return undefined;
+	private crewRepository: IRepository<Crew>;
+	private crewmanService: CrewmanService;
 
-	const crew = await crewRepository.findById(crewId);
-	return crew;
-}
-
-async function crewServiceCreateCrew(crewDto: ICreateCrewDto): Promise<ICrewDto> {
-
-	const crewmansDtos = await crewmanServiceGetCrewmans();
-	const crewmans = crewmansDtos.filter(crewman => crewDto.crewmans
-		?.some(crewmanId => crewmanId === crewman.id)
-		?? false
-	).map(crewman => new Crewman(crewman.id ?? 0, crewman.name, crewman.patent));
-
-	const crew = await crewRepository.create({
-		id: 0,
-		name: crewDto.name,
-		crewmans: crewmans
-	});
-
-	return crew;
-}
-
-async function crewServiceUpdateCrew(id: number, crewDto: IUpdateCrewDto): Promise<ICrewDto> {
-
-	const crew = await crewRepository.findById(id);
-
-	if (crew === null) {
-		throw new Error('404 Not Found: Não foi possível encontrar o recurso para ser atualizado');
+	constructor(
+		crewRepository: IRepository<Crew>,
+		crewmanService: CrewmanService,
+	) {
+		this.crewRepository = crewRepository;
+		this.crewmanService = crewmanService;
 	}
 
-	const crewmans = await getCrewCrewmans(crewDto);
+	async getCrews(): Promise<ICrewDto[]> {
+		const crews = await this.crewRepository.findAll();
+		return crews;
+	}
 
-	crew.name = crewDto.name;
-	crew.crewmans = crewmans;
+	async getCrew(crewId?: number): Promise<ICrewDto | undefined> {
 
-	return await crewRepository.update(id, crew);
-}
+		if (crewId === undefined) return undefined;
 
-async function crewServiceDeleteCrew(id: number): Promise<void> {
-	await crewRepository.delete(id);
-}
+		const crew = await this.crewRepository.findById(crewId);
+		return crew;
+	}
 
-async function getCrewCrewmans(crew: ICreateCrewDto): Promise<Crewman[]> {
+	async createCrew(crewDto: ICreateCrewDto): Promise<ICrewDto> {
 
-	const crewmans = await crewmanServiceGetCrewmans();
+		const crewmansDtos = await this.getCrewCrewmans(crewDto);
+		const crewmans = crewmansDtos.map(crewman => new Crewman(crewman.id ?? 0, crewman.name, crewman.patent));
 
-	return crewmans.filter(crewman => crew.crewmans
-		?.some(crewmanId => crewmanId === crewman.id)
-		?? false
-	)
-	.map(crewman => new Crewman(crewman.id ?? 0, crewman.name, crewman.patent));
+		const crew = await this.crewRepository.create({
+			id: 0,
+			name: crewDto.name,
+			crewmans: crewmans
+		});
+
+		return crew;
+	}
+
+	async updateCrew(id: number, crewDto: IUpdateCrewDto): Promise<ICrewDto> {
+
+		const crew = await this.crewRepository.findById(id);
+
+		const crewmansDtos = await this.getCrewCrewmans(crewDto);
+		const crewmans = crewmansDtos.map(crewman => new Crewman(crewman.id ?? 0, crewman.name, crewman.patent));
+
+		crew.name = crewDto.name;
+		crew.crewmans = crewmans;
+
+		return await this.crewRepository.update(id, crew);
+	}
+
+	async deleteCrew(id: number): Promise<void> {
+		await this.crewRepository.delete(id);
+	}
+
+	private async getCrewCrewmans(crew: ICreateCrewDto): Promise<ICrewmanDto[]> {
+
+		const crewmans = await this.crewmanService.getCrewmans();
+
+		return crewmans.filter(crewman => crew.crewmans
+			?.some(crewmanId => crewmanId === crewman.id)
+			?? false
+		);
+	}
 }
 
 export {
-	crewServiceGetCrews,
-	crewServiceGetCrew,
-	crewServiceCreateCrew,
-	crewServiceUpdateCrew,
-	crewServiceDeleteCrew
+	ICrewService,
+	CrewService
 };

@@ -2,7 +2,6 @@ import { dataSource } from "../database/config/dataSourceConfig";
 import { Rocket } from "../model/Rocket";
 import { IRepository } from "./Repository";
 
-
 class RocketRepository implements IRepository<Rocket> {
 
 	private repository = dataSource.getRepository(Rocket);

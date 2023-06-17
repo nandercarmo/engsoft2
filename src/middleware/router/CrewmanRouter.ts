@@ -1,14 +1,13 @@
 import { Router } from "express";
-
-import { createCrewman, deleteCrewman, getCrewman, getCrewmans, updateCrewman } from "../../controller/CrewmanController";
+import { crewmanController } from "../../modules/CrewmanModule";
 
 const router = Router();
 
-router.get('/', getCrewmans);
-router.get('/:id', getCrewman);
-router.post('/', createCrewman);
-router.put('/:id', updateCrewman);
-router.delete('/:id', deleteCrewman);
+router.get('/', crewmanController.getAll.bind(crewmanController));
+router.get('/:id', crewmanController.get.bind(crewmanController));
+router.post('/', crewmanController.create.bind(crewmanController));
+router.put('/:id', crewmanController.update.bind(crewmanController));
+router.delete('/:id', crewmanController.delete.bind(crewmanController));
 
 export {
 	router as CrewmanRouter

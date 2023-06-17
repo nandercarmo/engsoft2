@@ -1,14 +1,13 @@
 import { Router } from "express";
-
-import { createLaunch, deleteLaunch, getLaunch, getLaunchs, updateLaunch } from "../../controller/LaunchController";
+import { launchController } from "../../modules/LaunchModule";
 
 const router = Router();
 
-router.get('/', getLaunchs);
-router.get('/:id', getLaunch);
-router.post('/', createLaunch);
-router.put('/:id', updateLaunch);
-router.delete('/:id', deleteLaunch);
+router.get('/', launchController.getAll.bind(launchController));
+router.get('/:id', launchController.get.bind(launchController));
+router.post('/', launchController.create.bind(launchController));
+router.put('/:id', launchController.update.bind(launchController));
+router.delete('/:id', launchController.delete.bind(launchController));
 
 export {
 	router as LaunchRouter

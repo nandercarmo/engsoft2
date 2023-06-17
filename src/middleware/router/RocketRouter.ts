@@ -1,14 +1,13 @@
 import { Router } from "express";
-
-import { createRocket, deleteRocket, getRocket, getRockets, updateRocket } from "../../controller/RocketController";
+import { rocketController } from "../../modules/RocketModule";
 
 const router = Router();
 
-router.get('/', getRockets);
-router.get('/:id', getRocket);
-router.post('/', createRocket);
-router.put('/:id', updateRocket);
-router.delete('/:id', deleteRocket);
+router.get('/', rocketController.getAll.bind(rocketController));
+router.get('/:id', rocketController.get.bind(rocketController));
+router.post('/', rocketController.create.bind(rocketController));
+router.put('/:id', rocketController.update.bind(rocketController));
+router.delete('/:id', rocketController.delete.bind(rocketController));
 
 export {
 	router as RocketRouter
