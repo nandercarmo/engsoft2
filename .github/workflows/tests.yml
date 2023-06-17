@@ -1,0 +1,62 @@
+name: Run tests
+on: push
+jobs:
+  linux-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      - name: Install Dependencies
+        run: npm cache clean --force && rm -rf node_modules && npm install
+
+      - name: Build Production
+        run: npm run build
+
+      - name: Unit Tests
+        run: npm run test
+
+  windows-tests:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      - name: Install Dependencies
+        run: npm cache clean --force && rm -rf node_modules && npm install
+
+      - name: Build Production
+        run: npm run build
+
+      - name: Unit Tests
+        run: npm run test
+
+  mac-tests:
+    runs-on: macos-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      - name: Install Dependencies
+        run: npm cache clean --force && rm -rf node_modules && npm install
+
+      - name: Build Production
+        run: npm run build
+
+      - name: Unit Tests
+        run: npm run test
