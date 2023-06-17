@@ -13,7 +13,7 @@ jobs:
           node-version: 18
 
       - name: Install Dependencies
-        run: npm cache clean --force && rm -rf node_modules && npm install
+        run: npm ci
 
       - name: Unit Tests
         run: npm run tests
@@ -30,7 +30,7 @@ jobs:
           node-version: 18
 
       - name: Install Dependencies
-        run: npm cache clean --force && RMDIR /Q/S node_modules && npm install
+        run: npm cache clean --force && npm install
 
       - name: Unit Tests
         run: npm run tests
